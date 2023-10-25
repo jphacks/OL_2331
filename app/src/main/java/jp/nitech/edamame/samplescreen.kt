@@ -1,6 +1,5 @@
-package com.example.test
+package jp.nitech.edamame
 
-import android.telephony.TelephonyCallback
 import android.widget.Toast
 import androidx.compose.material.Button
 import androidx.compose.material.Text

@@ -1,5 +1,6 @@
-package com.example.test
+package jp.nitech.edamame
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,11 +10,14 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.test.ui.theme.TestTheme
+import jp.nitech.edamame.ui.theme.TestTheme
 
 @Composable
 private fun AppNavigator(navController: NavHostController) {
@@ -25,7 +29,7 @@ private fun AppNavigator(navController: NavHostController) {
             Text(text = "TODO: リザルト画面")
         }
         composable(Screen.SelectDestinationMap.routeWithArgs) {
-            Text(text = "TODO: 目的地選択画面")
+            SelectDestinationMapScreen()
         }
         composable(Screen.Settings.routeWithArgs) {
             samplescreen()
@@ -84,3 +88,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")

@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -61,6 +62,17 @@ dependencies {
     // Material Dialog
     implementation "io.github.vanpra.compose-material-dialogs:core:0.8.1-rc"
     implementation "io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc"
+
+    // GoogleMapServices
+    implementation 'com.google.maps:google-maps-services:2.2.0'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+
+    // Maps Compose
+    implementation 'com.google.maps.android:maps-compose:2.11.4'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+
+    // Datastore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

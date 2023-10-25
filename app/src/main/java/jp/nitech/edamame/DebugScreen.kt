@@ -1,4 +1,4 @@
-package com.example.test
+package jp.nitech.edamame
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

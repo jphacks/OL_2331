@@ -1,4 +1,4 @@
-package com.example.test
+package jp.nitech.edamame
 
 import org.junit.Test
 

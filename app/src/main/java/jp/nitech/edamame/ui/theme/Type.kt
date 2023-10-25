@@ -1,4 +1,4 @@
-package com.example.test.ui.theme
+package jp.nitech.edamame.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
