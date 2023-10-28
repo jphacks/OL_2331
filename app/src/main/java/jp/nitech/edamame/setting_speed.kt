@@ -48,17 +48,18 @@ fun settingspeed() {
     val walkingSpeed by vm.walkingSpeed.collectAsState(initial = WalkingSpeed.NORMAL)
 
     Column {
-        Options(name = "遅い", select = (walkingSpeed==WalkingSpeed.SLOW) , onClick = {
+        Modifier.padding(10.dp)
+        Options(name = "SLOW", select = (walkingSpeed==WalkingSpeed.SLOW) , onClick = {
             GlobalScope.launch(Dispatchers.IO){
                 vm.walkingSpeed(WalkingSpeed.SLOW)
             }
         } )
-        Options(name = "普通", select = (walkingSpeed==WalkingSpeed.NORMAL) , onClick = {
+        Options(name = "NORMAL", select = (walkingSpeed==WalkingSpeed.NORMAL) , onClick = {
             GlobalScope.launch(Dispatchers.IO){
                 vm.walkingSpeed(WalkingSpeed.NORMAL)
             }
         } )
-        Options(name = "速い", select = (walkingSpeed==WalkingSpeed.FAST) , onClick = {
+        Options(name = "FAST", select = (walkingSpeed==WalkingSpeed.FAST) , onClick = {
             GlobalScope.launch(Dispatchers.IO){
                 vm.walkingSpeed(WalkingSpeed.FAST)
             }
@@ -79,7 +80,7 @@ fun Options(name:String,select:Boolean,onClick:()->Unit){
                 selected = select,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 20.dp)
     ) {
         RadioButton(
             selected = select,
