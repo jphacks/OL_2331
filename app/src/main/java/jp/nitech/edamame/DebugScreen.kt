@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.favorite.Favorite
 import jp.nitech.edamame.favorite.FavoriteApplication
 import kotlinx.coroutines.CoroutineScope
@@ -85,7 +86,7 @@ fun DebugScreen(navController: NavController) {
                 Column {
                     favorites.forEach {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "${it.id} / ${it.arrivalTime.format(DateTimeFormatter.ISO_TIME)} / ${it.destination}")
+                            Text(text = "${it.id} / ${it.arrivalTime.format(DateTimeFormatter.ISO_TIME)} / ${it.destinationPlaceName}")
                             Button(onClick = {
                                 coroutineScope.launch(Dispatchers.IO) {
                                     vm.deleteFavorite(it)
@@ -129,10 +130,14 @@ private class DebugScreenViewModel(
     private val favoriteApplication = FavoriteApplication()
 
     fun addFavorite(
-        destination: String,
+        destinationPlaceName: String,
         arrivalTime: LocalTime,
     ) {
-        val newFavorite = favoriteApplication.addFavorite(destination, arrivalTime)
+        val newFavorite = favoriteApplication.addFavorite(
+            destinationPlaceName,
+            LatLng(0.0, 0.0),
+            arrivalTime
+        )
         _favorites.add(newFavorite)
     }
 

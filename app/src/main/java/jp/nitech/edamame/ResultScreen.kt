@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,19 +34,51 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.maps.model.LatLng
+import jp.nitech.edamame.extension.formatCommaSplit
 import jp.nitech.edamame.steps.Step
 import jp.nitech.edamame.steps.StepType
 import jp.nitech.edamame.utils.rememberInMemory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 
 @Composable
-fun ResultScreen() {
+fun ResultScreen(
+    favoriteId: Long?,
+    arrivalDate: String,
+    arrivalTime: String,
+    destinationLatLng: LatLng,
+    destinationPlaceName: String?,
+    destinationAddress: String?,
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val vm = rememberInMemory {
         ResultScreenViewModel(context, coroutineScope)
     }
+    val steps by vm.steps.collectAsState()
+    val lastCurrentLatLng by vm.lastCurrentLatLng.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.favoriteId = favoriteId
+        vm.arrivalDate = arrivalDate
+        vm.arrivalTime = arrivalTime
+        vm.destination = Place(
+            placeName = destinationPlaceName,
+            address = destinationAddress,
+            latLng = destinationLatLng,
+        )
+    }
+
+    LaunchedEffect(lastCurrentLatLng) {
+        if (lastCurrentLatLng == null) return@LaunchedEffect
+        coroutineScope.launch(Dispatchers.IO) {
+            vm.exploreSteps()
+        }
+    }
+
     Scaffold(
         topBar = {
             EdamameAppBar(
@@ -97,38 +131,7 @@ fun ResultScreen() {
                     color = Color(0xFF000000)
                 )
                 list(
-                    step = listOf(
-                        Step(
-                            LocalTime.now(),
-                            "起きる",
-                            "To do list\n・ごみを出す",
-                            StepType.WALK
-                        ),
-                        Step(
-                            LocalTime.now(),
-                            "家を出る",
-                            "詳細\n",
-                            StepType.WALK
-                        ),
-                        Step(
-                            LocalTime.now(),
-                            "名駅",
-                            "乗り換え\n",
-                            StepType.LOCAL_TRAIN
-                        ),
-                        Step(
-                            LocalTime.now(),
-                            "鶴舞駅",
-                            "詳細",
-                            StepType.WALK
-                        ),
-                        Step(
-                            LocalTime.now(),
-                            "名工大",
-                            "詳細",
-                            StepType.WALK
-                        )
-                    )
+                    step = steps ?: listOf(),
                 )
             }
         }
@@ -151,16 +154,14 @@ fun arrivaltime(date: String, time: String) {
 }
 
 @Composable
-private fun destination(dist: String) {
-    var context = LocalContext.current
-    var text = remember { mutableStateOf("") }
-
+private fun destination(place: Place?) {
+    val destinationText = place?.placeName ?: place?.latLng?.formatCommaSplit() ?: ""
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = dist, fontSize = 14.sp)
+        Text(text = destinationText, fontSize = 14.sp)
     }
 }
 

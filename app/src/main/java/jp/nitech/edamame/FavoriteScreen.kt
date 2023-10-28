@@ -7,17 +7,17 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
 import jp.nitech.edamame.utils.rememberInMemory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 
@@ -28,12 +28,19 @@ fun FavScreen(){
     val vm = rememberInMemory {
         FavoriteScreenViewModel(context, coroutineScope)
     }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch(Dispatchers.IO) {
+            vm.refreshFavorites()
+        }
+    }
+
     Scaffold(
         topBar = {
             EdamameAppBar(
                 title = "お気に入り",
                 right = {
-                    Row() {
+                    Row {
                         Icon(Icons.Default.Settings, "")
                     }
                 }
@@ -43,7 +50,7 @@ fun FavScreen(){
             Column (modifier = Modifier.padding(paddingValues)){
                 for(i in 0 until vm.favorites.value.size) {
                     Text(text = vm.favorites.value[i].arrivalTime.format(formatterTime))
-                    Text(text = vm.favorites.value[i].destination)
+                    Text(text = vm.favorites.value[i].destinationPlaceName ?: "")
                 }
             }
         }

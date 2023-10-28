@@ -1,8 +1,7 @@
 package jp.nitech.edamame.favorite
 
-import android.content.Context
+import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.MainApplication
-import kotlinx.coroutines.CoroutineScope
 import java.time.LocalTime
 
 class FavoriteApplication{
@@ -26,10 +25,12 @@ class FavoriteApplication{
     }
 
     fun addFavorite(
-        destination: String,
+        destinationPlaceName: String?,
+        destination: LatLng,
         arrivalTime: LocalTime,
     ): Favorite {
         val favoriteDb = FavoriteEntity(
+            destinationPlaceName = destinationPlaceName,
             destination = destination,
             arrivalTime = arrivalTime,
             order = favoriteDao.lastOrder().value + 1

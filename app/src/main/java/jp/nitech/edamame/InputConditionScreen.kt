@@ -37,6 +37,7 @@ import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import jp.nitech.edamame.extension.formatCommaSplit
 import jp.nitech.edamame.screenresult.rememberScreenResultConsumer
 import java.time.LocalDate
 import java.time.LocalTime
@@ -118,7 +119,23 @@ fun InputConditionScreen(navController: NavController) {
                     ontimePicked = { time.value = it.format(formatterTime) }
                 )
                 Spacer(Modifier.size(40.dp))
-                decision(onButtonClicked = {})
+                decision(onButtonClicked = {
+                    val place = place ?: return@decision
+                    val arguments = mutableMapOf<String, String>()
+                    arguments["arrivalDate"] = date.value
+                    arguments["arrivalTime"] = time.value
+                    arguments["destinationLatLng"] = place.latLng.formatCommaSplit()
+                    if (place.placeName != null) {
+                        arguments["destinationPlaceName"] = place.placeName
+                    }
+                    if (place.address != null) {
+                        arguments["destinationAddress"] = place.address
+                    }
+                    val argumentsQuery = arguments
+                        .map { "${it.key}=${it.value}" }
+                        .joinToString("&")
+                    navController.navigate("${Screen.Result.route}?${argumentsQuery}")
+                })
             }
         }
     )
