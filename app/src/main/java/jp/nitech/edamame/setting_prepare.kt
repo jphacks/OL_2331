@@ -57,7 +57,7 @@ fun SimpleOutlinedTextFieldSample() {
     val context= LocalContext.current
     LaunchedEffect(text){
         GlobalScope.launch(Dispatchers.IO) {
-            saveText(context= context,"preparetime")
+            saveText(context= context,"setting")
         }
     }
     Box(

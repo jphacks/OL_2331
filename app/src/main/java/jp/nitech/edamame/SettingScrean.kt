@@ -88,6 +88,7 @@ fun settingscrean(
 @Composable
 fun Main(navController: NavController,vm:SettingsScreenViewModel) {
     val minutesPreparing by vm.minutesPreparing.collectAsState(initial = 0)
+    val walkingSpeed by vm.walkingSpeed.collectAsState(initial = "普通")
     Column {
         Button(onClick = {
             navController.navigate("prepare")
@@ -108,7 +109,13 @@ fun Main(navController: NavController,vm:SettingsScreenViewModel) {
             navController.navigate("speed")
             Modifier.fillMaxWidth()
         }) {
-            Text("歩く速さ")
+            vm.walkingSpeed
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("歩く速さ")
+                Text(walkingSpeed.toString())
+            }
         }
 
 
