@@ -3,6 +3,7 @@ package jp.nitech.edamame
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.favorite.Favorite
 import jp.nitech.edamame.favorite.FavoriteApplication
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,11 @@ class FavoriteScreenViewModel(
         destination: String,
         arrivalTime: LocalTime,
     ) {
-        val newFavorite = favoriteApplication.addFavorite(destination, arrivalTime)
+        val newFavorite = favoriteApplication.addFavorite(
+            destination,
+            LatLng(0.0, 0.0),
+            arrivalTime,
+        )
         _favorites.add(newFavorite)
     }
 
