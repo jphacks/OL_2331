@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.datastore.core.DataStore
@@ -17,6 +18,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import jp.nitech.edamame.extension.toLatLng
 import jp.nitech.edamame.ui.theme.TestTheme
 
 
@@ -26,8 +29,31 @@ private fun AppNavigator(navController: NavHostController) {
         composable(Screen.InputCondition.routeWithArgs) {
             InputConditionScreen(navController = navController)
         }
-        composable(Screen.Result.routeWithArgs) {
-            ResultScreen()
+        composable(
+            Screen.Result.routeWithArgs,
+            arguments = listOf(
+                navArgument("favoriteId") { nullable = true },
+                navArgument("arrivalDate") { nullable = false },
+                navArgument("arrivalTime") { nullable = false },
+                navArgument("destinationLatLng") { nullable = false },
+                navArgument("destinationPlaceName") { nullable = true },
+                navArgument("destinationAddress") { nullable = true },
+            )
+        ) { navBackStackEntry ->
+            val arguments = navBackStackEntry.arguments
+            if (arguments == null) {
+                Text("arguments is null")
+                return@composable
+            }
+
+            ResultScreen(
+                favoriteId = arguments.getLong("favoriteId"),
+                arrivalDate = arguments.getString("arrivalDate")!!,
+                arrivalTime = arguments.getString("arrivalTime")!!,
+                destinationLatLng = arguments.getString("destinationLatLng")!!.toLatLng(),
+                destinationPlaceName = arguments.getString("destinationPlaceName"),
+                destinationAddress = arguments.getString("destinationAddress"),
+            )
         }
         composable(Screen.SelectDestinationMap.routeWithArgs) {
             SelectDestinationMapScreen(navController = navController)
@@ -72,7 +98,7 @@ sealed class Screen(
 
     object Result : Screen(
         route = "result",
-        routeWithArgs = "result?arrivalTime={arrivalTime}&destination={destination}",
+        routeWithArgs = "result?favoriteId={favoriteId}&arrivalDate={arrivalDate}&arrivalTime={arrivalTime}&destinationLatLng={destinationLatLng}&destinationPlaceName={destinationPlaceName}&destinationAddress={destinationAddress}"
     )
 
     object SelectDestinationMap : Screen(

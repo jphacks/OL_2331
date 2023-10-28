@@ -45,7 +45,14 @@ import java.time.LocalTime
 
 
 @Composable
-fun ResultScreen() {
+fun ResultScreen(
+    favoriteId: Long?,
+    arrivalDate: String,
+    arrivalTime: String,
+    destinationLatLng: LatLng,
+    destinationPlaceName: String?,
+    destinationAddress: String?,
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val vm = rememberInMemory {
@@ -54,18 +61,20 @@ fun ResultScreen() {
     val steps by vm.steps.collectAsState()
     val lastCurrentLatLng by vm.lastCurrentLatLng.collectAsState()
 
+    LaunchedEffect(Unit) {
+        vm.favoriteId = favoriteId
+        vm.arrivalDate = arrivalDate
+        vm.arrivalTime = arrivalTime
+        vm.destination = Place(
+            placeName = destinationPlaceName,
+            address = destinationAddress,
+            latLng = destinationLatLng,
+        )
+    }
+
     LaunchedEffect(lastCurrentLatLng) {
         if (lastCurrentLatLng == null) return@LaunchedEffect
-
         coroutineScope.launch(Dispatchers.IO) {
-            // TODO: テスト用
-            vm.destination = Place(
-                placeName = null,
-                address = null,
-                latLng = LatLng(43.7384913, 142.3067512),
-            )
-            vm.arrivalDate = "2023/11/30"
-            vm.arrivalTime = "19:00"
             vm.exploreSteps()
         }
     }
