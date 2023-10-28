@@ -29,12 +29,18 @@ import androidx.room.PrimaryKey
 //import jp.nitech.edamame.settingtodo.
 //import jp.nitech.edamame.settingtodo.ToDoDao
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import jp.nitech.edamame.steps.WalkingSpeed
+import jp.nitech.edamame.utils.rememberInMemory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -42,6 +48,15 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun settingprepare() {
+    val context= LocalContext.current
+    val coroutineScope= rememberCoroutineScope()
+    val vm = rememberInMemory {
+        SettingsScreenViewModel(context, coroutineScope)
+    }
+    var text  =vm.minutesPreparing.toString()
+    val minutesPreparing by vm.minutesPreparing.collectAsState(initial = 0)
+
+
     Column {
         SimpleOutlinedTextFieldSample()
         List1()
@@ -53,35 +68,44 @@ fun settingprepare() {
 //文字を入力させる
 @Composable
 fun SimpleOutlinedTextFieldSample() {
-    var text by remember { mutableStateOf("") }
+
     val context= LocalContext.current
-    LaunchedEffect(text){
-        GlobalScope.launch(Dispatchers.IO) {
-            saveText(context= context,"setting")
-        }
+    val coroutineScope= rememberCoroutineScope()
+    val vm = rememberInMemory {
+        SettingsScreenViewModel(context, coroutineScope)
     }
+
+
+    var text by remember { mutableStateOf("") }
+    val minutesPreparing by vm.minutesPreparing.collectAsState(initial = 0)
+
     Box(
         modifier = Modifier.padding(20.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-
-
         OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
+            value =text,
+            onValueChange = { value ->
+
+                text = value.filter{it.isDigit()}
+                GlobalScope.launch(Dispatchers.IO){
+                    vm.setMinutesPreparing(text.toInt())
+                }
+            },
             placeholder = { Text(text = "分") },
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
+
+
     }
 
-}
-val TEXT_KEY = stringPreferencesKey("example_text")
 
-suspend fun saveText(context: Context, text: String) {
-    context.dataStore.edit { settings ->
-        settings[TEXT_KEY] = text
-    }
+
 }
+
+
+
 
 @Composable
 fun List1() {

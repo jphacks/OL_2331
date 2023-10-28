@@ -18,72 +18,81 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import jp.nitech.edamame.steps.WalkingSpeed
+import jp.nitech.edamame.utils.rememberInMemory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun settingspeed() {
-    val radioOptions = listOf("遅め" ,"普通","速め")
-    val (selectedOption,onOptionSelected) = remember {
-        mutableStateOf(radioOptions[1])
-    }
-
-    var speed by remember {
-        mutableStateOf("")
-    }
     val context= LocalContext.current
-    LaunchedEffect(speed){
-        GlobalScope.launch(Dispatchers.IO) {
-            saveSpeed(context= context,"setting")
-        }
+    val coroutineScope= rememberCoroutineScope()
+    val vm = rememberInMemory {
+        SettingsScreenViewModel(context, coroutineScope)
     }
-
+    //val radioOptions = listOf("遅め" ,"普通","速め")
+    //val (selectedOption,onOptionSelected) = remember {
+    //    mutableStateOf(radioOptions[1])
+    val walkingSpeed by vm.walkingSpeed.collectAsState(initial = WalkingSpeed.NORMAL)
 
     Column {
-        radioOptions.forEach { text ->
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .selectable(
-                        selected = (text == selectedOption),
-                        onClick = {
-                            onOptionSelected
-                            speed = text
-
-                        }
-                    )
-                    .padding(horizontal = 16.dp)
-            ) {
-                RadioButton(selected = (text == selectedOption),
-                onClick = {
-                    onOptionSelected(text)
-
-                })
-                Text(
-                    text=text,
-                    style = MaterialTheme.typography.body1.merge(),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-
+        Options(name = "遅い", select = (walkingSpeed==WalkingSpeed.SLOW) , onClick = {
+            GlobalScope.launch(Dispatchers.IO){
+                vm.walkingSpeed(WalkingSpeed.SLOW)
             }
-        }
+        } )
+        Options(name = "普通", select = (walkingSpeed==WalkingSpeed.NORMAL) , onClick = {
+            GlobalScope.launch(Dispatchers.IO){
+                vm.walkingSpeed(WalkingSpeed.NORMAL)
+            }
+        } )
+        Options(name = "速い", select = (walkingSpeed==WalkingSpeed.FAST) , onClick = {
+            GlobalScope.launch(Dispatchers.IO){
+                vm.walkingSpeed(WalkingSpeed.FAST)
+            }
+        } )
     }
 
 
 }
-val SPEED_KEY = stringPreferencesKey("example_text")
-suspend fun saveSpeed(context: Context, speed: String ) {
-    context.dataStore.edit { settings ->
-        settings[SPEED_KEY] = speed
+
+
+@Composable
+fun Options(name:String,select:Boolean,onClick:()->Unit){
+    Row(
+
+        Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = select,
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp)
+    ) {
+        RadioButton(
+            selected = select,
+            onClick = onClick
+        )
+
+
+        Text(
+            text = name,
+            style = MaterialTheme.typography.body1.merge(),
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
-}
+
+    }
+
