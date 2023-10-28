@@ -9,12 +9,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import jp.nitech.edamame.utils.rememberInMemory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 
@@ -25,6 +28,13 @@ fun FavScreen(){
     val vm = rememberInMemory {
         FavoriteScreenViewModel(context, coroutineScope)
     }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch(Dispatchers.IO) {
+            vm.refreshFavorites()
+        }
+    }
+
     Scaffold(
         topBar = {
             EdamameAppBar(
