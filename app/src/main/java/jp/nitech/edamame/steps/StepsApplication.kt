@@ -126,7 +126,9 @@ class RouteCandidateParser {
     fun parse(routeCandidate: JsonObject): List<Step> {
         val steps = mutableListOf<Step>()
         val sections = routeCandidate.getAsJsonArray("sections")
-        for (i in 0..sections.size() step 2) {
+
+        // NOTE: 最後のSectionはゴール地点であるため処理しないことに注意
+        for (i in 0..(sections.size() - 2) step 2) {
             // 偶数番目はポイントセクション、奇数番目は移動セクションと仮定する。
             val pointSection = sections[i].asJsonObject
             val moveSection = sections[i + 1].asJsonObject
@@ -159,16 +161,17 @@ class RouteCandidateParser {
             moveSection.get("move").asString
         ) ?: throw Exception("Unknown transit type.")
 
-        val transport = moveSection.get("transport").asJsonObject
-
         return when (type) {
             WALK -> "徒歩 ${moveSection.get("time").asInt}分"
             CAR -> "車 ${moveSection.get("time").asInt}分"
             BICYCLE -> "自転車 ${moveSection.get("time").asInt}分"
             UNKNOWN -> "${moveSection.get("time").asInt}分"
-            else -> """"${moveSection.get("name")}
+            else -> {
+                val transport = moveSection.get("transport").asJsonObject
+                return """${moveSection.get("line_name").asString}
                 |${moveSection.get("time").asInt}分
-                |(${getLinksMessageFromLinksJsonArray(transport.getAsJsonArray("links"))})}""".trimMargin()
+                |(${getLinksMessageFromLinksJsonArray(transport.getAsJsonArray("links"))})""".trimMargin()
+            }
         }
     }
 
@@ -176,9 +179,11 @@ class RouteCandidateParser {
         val linkMessages = mutableListOf<String>()
         links.forEach { link ->
             val linkJsonObject = link.asJsonObject
-            val from = linkJsonObject.get("from").asString
-            val to = linkJsonObject.get("to").asString
-            linkMessages.add("$from〜$to")
+            val from = linkJsonObject.get("from").asJsonObject
+            val fromName = from.get("name").asString
+            val to = linkJsonObject.get("to").asJsonObject
+            val toName = to.get("name").asString
+            linkMessages.add("$fromName〜$toName")
         }
         return linkMessages.joinToString("、")
     }
