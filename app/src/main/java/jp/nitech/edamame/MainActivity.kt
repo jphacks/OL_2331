@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import jp.nitech.edamame.extension.toLatLng
 import jp.nitech.edamame.ui.theme.TestTheme
+import java.time.LocalDate
 
 
 @Composable
@@ -53,6 +55,7 @@ private fun AppNavigator(navController: NavHostController) {
                 destinationLatLng = arguments.getString("destinationLatLng")!!.toLatLng(),
                 destinationPlaceName = arguments.getString("destinationPlaceName"),
                 destinationAddress = arguments.getString("destinationAddress"),
+                navController = navController
             )
         }
         composable(Screen.SelectDestinationMap.routeWithArgs) {
@@ -62,7 +65,7 @@ private fun AppNavigator(navController: NavHostController) {
             settingscrean(navController = navController)
         }
         composable(Screen.Favorites.routeWithArgs) {
-            FavScreen()
+            FavScreen(date = LocalDate.now(),navController = navController)
         }
         composable(Screen.Loading.routeWithArgs) {
             LoadingScreen(navController = navController)

@@ -32,7 +32,7 @@ fun EdamameAppBar(
     Row(
         modifier = Modifier
             .background(MaterialTheme.colors.primary)
-            .padding(8.dp, 0.dp, 8.dp, 8.dp)
+            .padding(0.dp, 0.dp, 0.dp, 0.dp)
             .statusBarsPadding()
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -40,7 +40,7 @@ fun EdamameAppBar(
     ) {
         HeaderItem(
             Alignment.CenterStart,
-            modifier = Modifier.weight(1f).fillMaxWidth()
+            modifier = Modifier.weight(2f).fillMaxWidth()
         ) {
             if (isBackButtonShown) {
                 Icon(
@@ -55,7 +55,7 @@ fun EdamameAppBar(
         }
         HeaderItem(
             Alignment.Center,
-            modifier = Modifier.weight(7f).fillMaxWidth()
+            modifier = Modifier.weight(5f).fillMaxWidth()
         ) {
             Text(
                 text = title,
@@ -66,7 +66,7 @@ fun EdamameAppBar(
         }
         HeaderItem(
             Alignment.CenterEnd,
-            modifier = Modifier.weight(1f).fillMaxWidth()
+            modifier = Modifier.weight(2f).fillMaxWidth()
         ) {
             right()
         }

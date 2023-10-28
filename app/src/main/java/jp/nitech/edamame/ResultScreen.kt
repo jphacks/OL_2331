@@ -1,5 +1,9 @@
 package jp.nitech.edamame
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -34,14 +39,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.extension.formatCommaSplit
 import jp.nitech.edamame.steps.Step
 import jp.nitech.edamame.steps.StepType
 import jp.nitech.edamame.utils.rememberInMemory
 import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+import java.util.Calendar
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 
 @Composable
@@ -52,6 +61,7 @@ fun ResultScreen(
     destinationLatLng: LatLng,
     destinationPlaceName: String?,
     destinationAddress: String?,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -86,8 +96,20 @@ fun ResultScreen(
                 right = {
                     Row() {
                         //modifier = Modifier.clickable { fav = !fav }
-                        Icon(Icons.Default.Favorite, "", tint = Color(0xFFff0000))
-                        Icon(Icons.Default.Settings, "")
+                        Icon(Icons.Default.Favorite, "",
+                            tint = Color(0xFFff0000),
+                            modifier = Modifier
+                                .height(70.dp)
+                                .padding(end = 5.dp)
+                                .clickable { navController.navigate(Screen.Favorites.route) }
+                        )
+
+                        Icon(Icons.Default.Settings, "",
+                            modifier = Modifier
+                                .height(70.dp)
+                                .padding(end = 5.dp)
+                                .clickable { navController.navigate(Screen.Settings.route) }
+                        )
                     }
                 }
             )
@@ -133,6 +155,15 @@ fun ResultScreen(
                 list(
                     step = steps ?: listOf(),
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(12.dp) ,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    arrivaltime("", vm.arrivalTime)
+                    destination(vm.destination)
+                }
             }
         }
     )
@@ -216,6 +247,39 @@ fun list(step: List<Step>) {
     }
 }
 
+/*
+//https://developer.android.com/training/scheduling/alarms?hl=ja
+@Composable
+fun alarm(){
+    private var alarmMgr: AlarmManager? = null
+    private lateinit var alarmIntent: PendingIntent
+    ...
+    alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    alarmIntent = Intent(context, AlarmReceiver::class.java).let { intent ->
+        PendingIntent.getBroadcast(context, 0, intent, 0)
+    }
+
+    // Set the alarm to start at 8:30 a.m.　画面にボタンでアラームのオン・オフ？？
+    val calendar: Calendar = Calendar.getInstance().apply {
+        timeInMillis = System.currentTimeMillis()
+        //起きる時間,stepの中から取り出す？時間と分に分けないといけない
+        set(Calendar.HOUR_OF_DAY, 8)
+        set(Calendar.MINUTE, 30)
+    }
+
+    // setRepeating() lets you specify a precise custom interval--in this case,
+    // 20 minutes.　設定からスヌーズの時間を持ってくる
+    alarmMgr?.setRepeating(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        1000 * 60 * 20,
+        alarmIntent
+    )
+}
+
+ // If the alarm has been set, cancel it.
+    alarmMgr?.cancel(alarmIntent)
+*/
 @Composable
 fun reversal(modifier: Modifier, fav: Boolean) {
     Box(
