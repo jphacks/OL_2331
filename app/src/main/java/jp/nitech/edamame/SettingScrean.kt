@@ -1,49 +1,33 @@
 package jp.nitech.edamame
 
-import android.annotation.SuppressLint
-import android.view.Display.Mode
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement.Absolute.SpaceEvenly
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.lightColors
-import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import androidx.compose.material.Surface as Surface1
+import jp.nitech.edamame.utils.rememberInMemory
+
 
 //@Preview(showBackground = true, name = "Text Preview")
 
@@ -51,9 +35,14 @@ import androidx.compose.material.Surface as Surface1
 @Composable
 fun settingscrean(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 ) {
     val navController = rememberNavController()
+    val context= LocalContext.current
+    val coroutineScope= rememberCoroutineScope()
+    val vm= rememberInMemory {
+        SettingsScreenViewModel(context, coroutineScope)
+    }
     Scaffold(
         topBar = {
             EdamameAppBar(
@@ -79,7 +68,7 @@ fun settingscrean(
                 startDestination = "main",
                 modifier=Modifier.padding(paddingValues)) {
                 composable("main") {
-                    Main(navController = navController)
+                    Main(navController = navController,vm)
                 }
                 composable("prepare") {
                     settingprepare()
@@ -97,14 +86,24 @@ fun settingscrean(
 
 
 @Composable
-fun Main(navController: NavController) {
+fun Main(navController: NavController,vm:SettingsScreenViewModel) {
+    val minutesPreparing by vm.minutesPreparing.collectAsState(initial = 0)
     Column {
         Button(onClick = {
             navController.navigate("prepare")
             Modifier.fillMaxWidth()
         }) {
-            Text("準備時間")
+            vm.minutesPreparing
+
+            Row(
+                //Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("準備時間")
+                Text(minutesPreparing.toString())
+            }
         }
+
         Button(onClick = {
             navController.navigate("speed")
             Modifier.fillMaxWidth()
@@ -120,23 +119,10 @@ fun Main(navController: NavController) {
 fun PrepareTime(
     modifier: Modifier,
     navController: NavHostController
-    ) {
-
-}
-
-@Composable
-fun Speed(
-    navController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") {
-            Main(navController = navController)
-        }
-        composable("speed") {
-            settingspeed()
-        }
-    }
+
 }
+
 
 
 

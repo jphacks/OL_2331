@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ToDoDao {
     @Insert
-    suspend fun insertTask(task: Task)
+    suspend fun insertTask(task: ToDo)
 
-    @Query("SELECT * FROM Task")
-    fun loadAllTasks(): Flow<List<Task>> // change
+    @Query("SELECT * FROM ToDo")
+    fun loadAllTasks(): Flow<List<ToDo>> // change
 
     @Update
-    suspend fun updateTask(task: Task) // change
+    suspend fun updateTask(task: ToDo) // change
 
     @Delete
-    suspend fun deleteTask(task: Task) // change
+    suspend fun deleteTask(task: ToDo) // change
 }
