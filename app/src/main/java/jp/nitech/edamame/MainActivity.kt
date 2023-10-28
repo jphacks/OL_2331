@@ -136,3 +136,4 @@ class MainActivity : ComponentActivity() {
 }
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+val Context.prepareData: DataStore<Preferences> by preferencesDataStore(name = "preparetime")
