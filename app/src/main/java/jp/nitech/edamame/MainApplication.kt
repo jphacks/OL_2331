@@ -12,7 +12,9 @@ class MainApplication : Application() {
             applicationContext,
             EdamameDatabase::class.java,
             "edamameDatabase"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     companion object {
