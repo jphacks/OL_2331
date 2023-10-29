@@ -1,12 +1,7 @@
 package jp.nitech.edamame
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,13 +40,13 @@ import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.extension.formatCommaSplit
 import jp.nitech.edamame.steps.Step
 import jp.nitech.edamame.steps.StepType
-import jp.nitech.edamame.steps.WalkingSpeed
+import jp.nitech.edamame.steps.findStepTypeIcon
 import jp.nitech.edamame.utils.rememberInMemory
 import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import kotlinx.coroutines.launch
 import java.time.LocalTime
-import java.util.Calendar
+
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 
@@ -129,9 +124,6 @@ fun ResultScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 //verticalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
-                    .background(
-                        color = Color(0xFFffc1ff)
-                    )
                     .padding(paddingValues)
             ) {
                 //Divider(
@@ -148,11 +140,11 @@ fun ResultScreen(
                     reversal(
                         modifier = Modifier
                             .clickable {
-                                       if(vm.isFavorited){
-                                           vm.unlike()
-                                       }else{
-                                           vm.like()
-                                       }
+                                if (vm.isFavorited) {
+                                    vm.unlike()
+                                } else {
+                                    vm.like()
+                                }
                             },
                         fav = vm.isFavorited
                     )
@@ -162,13 +154,23 @@ fun ResultScreen(
                     modifier = Modifier.height(6.dp),
                     color = Color(0xFF000000)
                 )
-                list(
+                StepList(
                     step = steps ?: listOf(),
                 )
+                if (vm.arrivalTime.isNotBlank()) {
+                    StepListItem(
+                        step = Step(
+                            title = vm.destination?.placeName ?: "目的地",
+                            type = StepType.GOAL,
+                            startTime = LocalTime.parse(vm.arrivalTime, formatterTime),
+                            detailMessage = "",
+                        )
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(12.dp) ,
+                        .size(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     arrivaltime("", vm.arrivalTime)
@@ -207,11 +209,7 @@ private fun destination(place: Place?) {
 }
 
 @Composable
-fun list(step: List<Step>) {
-    var context = LocalContext.current
-    var text = remember { mutableStateOf("") }
-
-
+fun StepList(step: List<Step>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,40 +218,45 @@ fun list(step: List<Step>) {
         verticalArrangement = Arrangement.Center
 
     ) {
-        for (i in 0 until step.size) {
-            val s = step[i]
-            var editable by remember { mutableStateOf(false) }
-            Column(
-                modifier = Modifier
-                    .clickable { editable = !editable }
-                    .padding(
-                        horizontal = 32.dp,
-                        vertical = 16.dp
-                    ),
-                //horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = s.startTime.format(formatterTime), fontSize = 20.sp)
-                    Text(text = s.title, fontSize = 20.sp)
-                    Text(text = s.type.name, fontSize = 20.sp)
-                }
-                AnimatedVisibility(
-                    visible = editable,
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                ) {
-                    Text(text = s.detailMessage)
-                }
-                Divider(
-                    modifier = Modifier.height(2.dp),
-                    color = Color(0xFF000000)
-                )
-            }
+        step.forEach { StepListItem(it) }
+    }
+}
+
+@Composable
+fun StepListItem(step: Step) {
+    var editable by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .clickable { editable = !editable }
+            .padding(
+                horizontal = 32.dp,
+                vertical = 16.dp
+            ),
+        //horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = step.startTime.format(formatterTime), fontSize = 20.sp)
+            Text(text = step.title, fontSize = 20.sp)
+            Icon(
+                findStepTypeIcon(step.type),
+                contentDescription = step.type.name
+            )
         }
+        AnimatedVisibility(
+            visible = editable,
+            modifier = Modifier
+                .padding(start = 16.dp)
+        ) {
+            Text(text = step.detailMessage)
+        }
+        Divider(
+            modifier = Modifier.height(2.dp),
+            color = Color(0xFF000000)
+        )
     }
 }
 

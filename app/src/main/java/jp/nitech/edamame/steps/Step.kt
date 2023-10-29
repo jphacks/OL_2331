@@ -27,7 +27,8 @@ enum class StepType(val navitimeAPIString: String) {
     SHUTTLE_BUS("shuttle_bus"),
     LOCAL_BUS("local_bus"),
     HIGHWAY_BUS("highway_bus"),
-    UNKNOWN("unknown"),;
+    UNKNOWN("unknown"),
+    GOAL("__goal__");
 
     companion object {
         fun fromNaviTimeAPIString(navitimeAPIString: String): StepType? =
