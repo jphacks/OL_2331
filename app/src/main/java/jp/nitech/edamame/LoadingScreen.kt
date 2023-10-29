@@ -33,7 +33,7 @@ private fun EdamameAppPermissionRequester(
     PermissionRequester(
         requiredPermissions = requiredPermissions,
         onAllRequiredPermissionsIsGranted = {
-            navController.navigate(Screen.Debug.route)
+            navController.navigate(Screen.InputCondition.route)
         },
         onNotAllRequiredPermissionsIsGranted = {
             Toast.makeText(context, "位置情報の権限を許可してください", Toast.LENGTH_LONG).show()

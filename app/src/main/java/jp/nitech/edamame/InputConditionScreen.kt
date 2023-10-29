@@ -76,7 +76,7 @@ fun InputConditionScreen(navController: NavController) {
     Scaffold(
         topBar = {
             EdamameAppBar(
-                title = "入力画面",
+                title = "目的地と到着時間を入力",
                 right = {
                     Row {
                         Icon(
@@ -124,10 +124,10 @@ fun InputConditionScreen(navController: NavController) {
                     ondatePicked = { date.value = it.format(formatterDate) },
                     ontimePicked = { time.value = it.format(formatterTime) }
                 )
-                Spacer(Modifier.size(20.dp))
-                todo(
-                    onButtonClicked = {navController.navigate(Screen.Settings.route)}
-                )
+//                Spacer(Modifier.size(20.dp))
+//                todo(
+//                    onButtonClicked = {navController.navigate(Screen.Settings.route)}
+//                )
                 Spacer(Modifier.size(40.dp))
                 decision(time.value,place,onButtonClicked = {
                     val place = place ?: return@decision
@@ -225,9 +225,14 @@ fun time(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        val dateTimeText = if (!(date.isBlank() && time.isBlank())) {
+            "$date $time"
+        } else {
+            ""
+        }
         Text(text = "到着時間", fontSize = 25.sp)
         OutlinedTextField(
-            value = "$date $time",
+            value = dateTimeText,
             onValueChange = {},
             enabled = false,
             placeholder = { Text(text = "到着時間を選択してください") },

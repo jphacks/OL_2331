@@ -102,7 +102,7 @@ fun ResultScreen(
     Scaffold(
         topBar = {
             EdamameAppBar(
-                title = "",
+                title = "〜検索結果〜",
                 right = {
                     Row() {
                         //modifier = Modifier.clickable { fav = !fav }
