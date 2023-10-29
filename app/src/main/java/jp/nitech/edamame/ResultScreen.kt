@@ -16,6 +16,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -25,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,10 +68,14 @@ fun ResultScreen(
     val vm = rememberInMemory {
         ResultScreenViewModel(context, coroutineScope)
     }
-    val steps by vm.steps.collectAsState()
+    val stepsCandidates by vm.stepsCandidates.collectAsState()
     val lastCurrentLatLng by vm.lastCurrentLatLng.collectAsState()
     val walkingSpeed by vm.walkingSpeed.collectAsState()
     val minutesPreparing by vm.minutesPreparing.collectAsState()
+
+    var selectedCandidatesTabIndex by remember {
+        mutableIntStateOf(0)
+    }
 
     LaunchedEffect(Unit) {
         vm.favoriteId = favoriteId
@@ -154,19 +161,38 @@ fun ResultScreen(
                     modifier = Modifier.height(6.dp),
                     color = Color(0xFF000000)
                 )
-                StepList(
-                    step = steps ?: listOf(),
-                )
-                if (vm.arrivalTime.isNotBlank()) {
-                    StepListItem(
-                        step = Step(
-                            title = vm.destination?.placeName ?: "目的地",
-                            type = StepType.GOAL,
-                            startTime = LocalTime.parse(vm.arrivalTime, formatterTime),
-                            detailMessage = "",
-                        )
-                    )
+
+                if (stepsCandidates != null) {
+                    TabRow(selectedTabIndex = selectedCandidatesTabIndex) {
+                        stepsCandidates?.forEachIndexed { index, steps ->
+                            Tab(
+                                selected = selectedCandidatesTabIndex == index,
+                                onClick = { selectedCandidatesTabIndex = index },
+                                modifier = Modifier.padding(vertical = 16.dp),
+                            ) {
+                                Text(text = "${index+1}")
+                            }
+                        }
+                    }
                 }
+
+                stepsCandidates?.forEachIndexed { index, steps ->
+                    if (selectedCandidatesTabIndex != index) return@forEachIndexed
+                    StepList(
+                        step = steps,
+                    )
+                    if (vm.arrivalTime.isNotBlank()) {
+                        StepListItem(
+                            step = Step(
+                                title = vm.destination?.placeName ?: "目的地",
+                                type = StepType.GOAL,
+                                startTime = LocalTime.parse(vm.arrivalTime, formatterTime),
+                                detailMessage = "",
+                            )
+                        )
+                    }
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

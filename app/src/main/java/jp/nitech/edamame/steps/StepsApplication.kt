@@ -57,7 +57,7 @@ class StepsApplication(
     fun exploreSteps(
         exploreStepsRequest: ExploreStepsRequest,
         exploreStepsSettings: ExploreStepsSettings,
-    ): Result<List<Step>, Exception> {
+    ): Result<List<List<Step>>, Exception> {
         try {
             // NAVITIME RapidAPI ルート検索（トータルナビ）で、出発位置から到着位置までの経路探索を行う。
             // 到着日時、歩く速度の指定も行う。
@@ -88,22 +88,26 @@ class StepsApplication(
                 return Err(Exception("No route candidates."))
 
             // RouteCandidateParser、経路候補の最初のアイテムを解析する。
-            val firstRouteCandidate = responseBody.getAsJsonArray("items")[0].asJsonObject
-            val routeSteps = RouteCandidateParser().parse(firstRouteCandidate)
+            val stepsCandidates = mutableListOf<List<Step>>()
+            responseBody.getAsJsonArray("items").forEach { item ->
+                val routeCandidate = item.asJsonObject
+                val routeSteps = RouteCandidateParser().parse(routeCandidate)
 
-            // 準備のステップを追加
-            val firstStepStartTime = routeSteps[0].startTime
-            val preparingStep = Step(
-                startTime = firstStepStartTime.minusMinutes(
-                    exploreStepsRequest.preparingMinutes.toLong()
-                ),
-                title = "準備",
-                detailMessage = exploreStepsRequest.preparingTodos.joinToString("\n") { it.title },
-                type = StepType.PREPARE,
-            )
-            val steps = listOf(preparingStep, *routeSteps.toTypedArray())
+                // 準備のステップを追加
+                val firstStepStartTime = routeSteps[0].startTime
+                val preparingStep = Step(
+                    startTime = firstStepStartTime.minusMinutes(
+                        exploreStepsRequest.preparingMinutes.toLong()
+                    ),
+                    title = "準備",
+                    detailMessage = exploreStepsRequest.preparingTodos.joinToString("\n") { it.title },
+                    type = StepType.PREPARE,
+                )
+                val steps = listOf(preparingStep, *routeSteps.toTypedArray())
+                stepsCandidates.add(steps)
+            }
 
-            return Ok(steps)
+            return Ok(stepsCandidates)
         } catch (ex: Exception) {
             return Err(ex)
         }

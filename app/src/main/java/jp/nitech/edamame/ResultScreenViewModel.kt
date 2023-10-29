@@ -21,12 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.lastOrNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,8 +41,8 @@ class ResultScreenViewModel(
     var arrivalDate by mutableStateOf("")
     var arrivalTime by mutableStateOf("")
 
-    private var _steps = MutableStateFlow<List<Step>?>(null)
-    val steps = _steps.asStateFlow()
+    private var _stepsCandidates = MutableStateFlow<List<List<Step>>?>(null)
+    val stepsCandidates = _stepsCandidates.asStateFlow()
 
     private val _lastCurrentLatLng = MutableStateFlow<LatLng?>(null)
     val lastCurrentLatLng = _lastCurrentLatLng.asStateFlow()
@@ -111,7 +106,7 @@ class ResultScreenViewModel(
 
         // NOTE: Not implemented when error
         exploreStepsResult.onSuccess {steps ->
-            this._steps.tryEmit(steps)
+            this._stepsCandidates.tryEmit(steps)
         }.onFailure {
             Log.w("ResultScreenViewModel", "Failed to get steps: ${it.printStackTrace()}")
         }
