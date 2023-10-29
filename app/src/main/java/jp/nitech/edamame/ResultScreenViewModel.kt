@@ -6,17 +6,27 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.favorite.FavoriteApplication
 import jp.nitech.edamame.steps.Step
 import jp.nitech.edamame.steps.StepsApplication
+import jp.nitech.edamame.steps.WalkingSpeed
 import jp.nitech.edamame.utils.LocationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,17 +52,40 @@ class ResultScreenViewModel(
     private val _lastCurrentLatLng = MutableStateFlow<LatLng?>(null)
     val lastCurrentLatLng = _lastCurrentLatLng.asStateFlow()
 
+    val minutesPreparingFlow: Flow<Int> = context.dataStore.data.map { preferences ->
+        preferences[MINUTES_PREPARING_PREF_KEY] ?: 0
+    }
+    var minutesPreparing = MutableStateFlow<Int?>(null)
+
+    val walkingSpeedFlow: Flow<WalkingSpeed> = context.dataStore.data.map { preferences ->
+        val walkingSpeedStr = preferences[WALKING_SPEED_PREF_KEY] ?: WalkingSpeed.NORMAL.name
+        return@map WalkingSpeed.valueOf(walkingSpeedStr)
+    }
+    var walkingSpeed = MutableStateFlow<WalkingSpeed?>(null)
+
     init {
         _lastCurrentLatLng.tryEmit(LocationUtil.getCurrentLatLng(context))
+        coroutineScope.launch{
+            walkingSpeedFlow.collect { v ->
+                walkingSpeed.emit(v)
+            }
+        }
+        coroutineScope.launch {
+            minutesPreparingFlow.collect { v ->
+                minutesPreparing.emit(v)
+            }
+        }
     }
 
-    suspend fun exploreSteps() {
+    fun exploreSteps() {
         // リクエスト用の変数にコンバート
         val arrivalDate = LocalDate.parse(this.arrivalDate, formatterDate)
         val arrivalTime = LocalTime.parse(this.arrivalTime, formatterTime)
         val arrivalDateTime = LocalDateTime.of(arrivalDate, arrivalTime)
         val start = lastCurrentLatLng.value ?: return
         val goal = destination?.latLng ?: return
+        val minutesPreparing = this.minutesPreparing.value ?: return
+        val walkingSpeed = this.walkingSpeed.value ?: return
 
         // Request
         val appInfo = context.packageManager
@@ -64,12 +97,12 @@ class ResultScreenViewModel(
             arrivalDateTime = arrivalDateTime,
             start = start,
             goal = goal,
-            preparingTodos = listOf(),
-            preparingMinutes = 0,
+            preparingTodos = listOf(), // TODO: Load preparation todos.
+            preparingMinutes = minutesPreparing,
         )
         // TODO: Load walking speed.
         val exploreStepSettings = StepsApplication.ExploreStepsSettings(
-
+            walkingSpeed = walkingSpeed,
         )
         val exploreStepsResult = stepsApplication.exploreSteps(
             exploreStepsRequest,
@@ -78,7 +111,7 @@ class ResultScreenViewModel(
 
         // NOTE: Not implemented when error
         exploreStepsResult.onSuccess {steps ->
-            this._steps.emit(steps)
+            this._steps.tryEmit(steps)
         }.onFailure {
             Log.w("ResultScreenViewModel", "Failed to get steps: ${it.printStackTrace()}")
         }
@@ -124,4 +157,8 @@ class ResultScreenViewModel(
             favoriteApplication.deleteFavoriteById(_favoriteId)
         }
     }
+
+    private final val MINUTES_PREPARING_PREF_KEY = intPreferencesKey("MINUTES_PREPARING")
+    private final val WALKING_SPEED_PREF_KEY = stringPreferencesKey("WALKING_SPEED")
+
 }

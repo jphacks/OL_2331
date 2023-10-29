@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,6 +45,7 @@ import com.google.android.gms.maps.model.LatLng
 import jp.nitech.edamame.extension.formatCommaSplit
 import jp.nitech.edamame.steps.Step
 import jp.nitech.edamame.steps.StepType
+import jp.nitech.edamame.steps.WalkingSpeed
 import jp.nitech.edamame.utils.rememberInMemory
 import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.flow.internal.NoOpContinuation.context
@@ -70,6 +72,8 @@ fun ResultScreen(
     }
     val steps by vm.steps.collectAsState()
     val lastCurrentLatLng by vm.lastCurrentLatLng.collectAsState()
+    val walkingSpeed by vm.walkingSpeed.collectAsState()
+    val minutesPreparing by vm.minutesPreparing.collectAsState()
 
     LaunchedEffect(Unit) {
         vm.favoriteId = favoriteId
@@ -82,8 +86,14 @@ fun ResultScreen(
         )
     }
 
-    LaunchedEffect(lastCurrentLatLng) {
+    LaunchedEffect(lastCurrentLatLng, walkingSpeed, minutesPreparing) {
+        Log.d("ResultScreen", "lastCurrentLatLng: $lastCurrentLatLng")
+        Log.d("ResultScreen", "walkingSpeed: $walkingSpeed")
+        Log.d("ResultScreen", "minutesPreparing: $minutesPreparing")
         if (lastCurrentLatLng == null) return@LaunchedEffect
+        if (walkingSpeed == null) return@LaunchedEffect
+        if (minutesPreparing == null) return@LaunchedEffect
+
         coroutineScope.launch(Dispatchers.IO) {
             vm.exploreSteps()
         }
