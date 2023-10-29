@@ -21,6 +21,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -112,11 +115,23 @@ fun InputConditionScreen(navController: NavController) {
                 //color = Color(0xFFffc1ff)
                 //)
             ) {
+                Icon(
+                    Icons.Default.Place,
+                    "",
+                    tint = Color(0xFF000000),
+                    modifier = Modifier.size(60.dp)
+                    )
                 destination(
                     place = place,
                     onClick = {navController.navigate(Screen.SelectDestinationMap.route)},
                 )
-                Spacer(Modifier.size(20.dp))
+                Spacer(Modifier.size(60.dp))
+                Icon(
+                    Icons.Default.Schedule,
+                    "",
+                    tint = Color(0xFF000000),
+                    modifier = Modifier.size(60.dp)
+                )
                 time(date.value,
                     time.value,
                     dialogStateDate,
