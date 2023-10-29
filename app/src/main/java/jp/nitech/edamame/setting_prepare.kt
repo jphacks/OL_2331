@@ -59,7 +59,6 @@ fun settingprepare() {
 
     Column {
         SimpleOutlinedTextFieldSample()
-        List1()
 
     }
 
@@ -107,12 +106,3 @@ fun SimpleOutlinedTextFieldSample() {
 
 
 
-@Composable
-fun List1() {
-    val fruits = listOf("Apple", "Orange", "Grape", "Peach", "Strawberry")
-    LazyColumn {
-        items(fruits) { fruit ->
-            Text(text = "This is $fruit",color = Color.Blue)
-        }
-    }
-}
