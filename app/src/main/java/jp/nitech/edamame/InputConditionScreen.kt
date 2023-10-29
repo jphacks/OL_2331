@@ -76,7 +76,7 @@ fun InputConditionScreen(navController: NavController) {
     Scaffold(
         topBar = {
             EdamameAppBar(
-                title = "目的地と到着時間を入力",
+                title = "ChocoAlate",
                 right = {
                     Row {
                         Icon(
